@@ -1,11 +1,17 @@
 <h2>Doctor's Appointments</h2>
+
 <ul>
   {% for appointment in appointments %}
   <li>
-    {{ appointment.date }} at {{ appointment.time }} - {{
-    appointment.patient.user.get_full_name }}
+    <strong>Date:</strong> {{ appointment.date }}<br />
+    <strong>Time:</strong> {{ appointment.time }}<br />
+    <strong>Patient:</strong> {{ appointment.patient.user.get_full_name }}<br />
+    <a href="{% url 'add_medical_record' appointment.id %}"
+      >Add Medical Record</a
+    >
   </li>
+  <hr />
   {% empty %}
-  <li>No appointments yet.</li>
+  <li>No appointments found.</li>
   {% endfor %}
 </ul>

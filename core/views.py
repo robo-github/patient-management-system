@@ -1,9 +1,10 @@
-from .models import Appointment
-from django.shortcuts import render, redirect
+from .models import Appointment, MedicalRecord, Doctor
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile, Patient
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 def home(request):
@@ -12,19 +13,31 @@ def home(request):
 
 def signup_view(request):
     if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
         username = request.POST['username']
         password = request.POST['password']
         age = request.POST['age']
         gender = request.POST['gender']
         contact = request.POST['contact']
 
-        # Create user
-        user = User.objects.create_user(username=username, password=password)
-        # Create UserProfile with patient role
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+
+        # Set the role as 'patient' by default
         UserProfile.objects.create(user=user, role='patient')
-        # Create Patient profile
+
+        #  Create entry in Patient table
         Patient.objects.create(
-            user=user, age=age, gender=gender, contact=contact)
+            user=user,
+            age=age,
+            gender=gender,
+            contact=contact
+        )
 
         return redirect('login')
 
@@ -68,11 +81,34 @@ def logout_view(request):
 @login_required
 def book_appointment(request):
     if request.user.userprofile.role != 'receptionist':
-        # ❌ Block users who are not receptionist
         return redirect('dashboard')
 
-    # ✅ Allowed receptionist can continue here
-    return render(request, 'book_appointment.html')
+    if request.method == 'POST':
+        patient_id = request.POST.get('patient')
+        doctor_id = request.POST.get('doctor')
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+
+        patient = Patient.objects.get(id=patient_id)
+        doctor = Doctor.objects.get(id=doctor_id)
+
+        Appointment.objects.create(
+            patient=patient,
+            doctor=doctor,
+            date=date,
+            time=time,
+            status='Scheduled'
+        )
+
+        return redirect('dashboard')  # or a success page
+
+    patients = Patient.objects.all()
+    doctors = Doctor.objects.all()
+
+    return render(request, 'book_appointment.html', {
+        'patients': patients,
+        'doctors': doctors
+    })
 
 
 @login_required
@@ -106,3 +142,26 @@ def view_appointments(request):
     doctor = request.user.doctor
     appointments = Appointment.objects.filter(doctor=doctor)
     return render(request, 'doctor_appointments.html', {'appointments': appointments})
+
+# Add medical report
+
+
+@login_required
+def add_medical_record(request, appointment_id):
+    if request.user.userprofile.role != 'doctor':
+        return redirect('dashboard')
+
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    if request.method == 'POST':
+        diagnosis = request.POST.get('diagnosis')
+        prescription = request.POST.get('prescription')
+
+        MedicalRecord.objects.create(
+            appointment=appointment,
+            diagnosis=diagnosis,
+            prescription=prescription
+        )
+        return redirect('view_appointments')  # or doctor dashboard
+
+    return render(request, 'add_medical_record.html', {'appointment': appointment})
