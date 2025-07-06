@@ -1,20 +1,17 @@
 <h2>Your Appointments</h2>
-<table border="1">
-  <tr>
-    <th>Date</th>
-    <th>Time</th>
-    <th>Doctor</th>
-  </tr>
+
+{% if appointments %}
+<ul>
   {% for appt in appointments %}
-  <tr>
-    <td>{{ appt.date }}</td>
-    <td>{{ appt.time }}</td>
-    <td>{{ appt.doctor.user.get_full_name }}</td>
-  </tr>
-  {% empty %}
-  <tr>
-    <td colspan="3">No appointments found.</td>
-  </tr>
+  <li>
+    <strong>Date:</strong> {{ appt.date }}<br />
+    <strong>Time:</strong> {{ appt.time }}<br />
+    <strong>Doctor:</strong> {{ appt.doctor.user.get_full_name }}
+  </li>
+  <hr />
   {% endfor %}
-</table>
+</ul>
+{% else %}
+<p>No appointments yet.</p>
+{% endif %}
 <a href="{% url 'dashboard' %}">Back to Dashboard</a>

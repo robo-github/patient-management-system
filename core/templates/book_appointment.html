@@ -35,3 +35,7 @@
 
   <button type="submit" style="width: 300px; padding: 6px">Book</button>
 </form>
+
+{% if messages %} {% for message in messages %}
+<p style="color: green">{{ message }}</p>
+{% endfor %} {% endif %}

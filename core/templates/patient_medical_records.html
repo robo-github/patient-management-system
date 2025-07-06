@@ -1,0 +1,20 @@
+<h2>Your Medical Records</h2>
+
+<ul>
+  {% for record in records %}
+  <li>
+    <strong>Date:</strong> {{ record.appointment.date }}<br />
+    <strong>Doctor:</strong> {{ record.appointment.doctor.user.first_name }}<br />
+    <strong>Diagnosis:</strong> {{ record.diagnosis }}<br />
+    <strong>Prescription:</strong> {{ record.prescription }}
+  </li>
+  <hr />
+  {% empty %}
+  <li>No records found.</li>
+  {% endfor %}
+</ul>
+{% if record.id %}
+<a href="{% url 'export_pdf' record.id %}">Download PDF</a>
+{% else %}
+<p style="color: red">Missing record ID</p>
+{% endif %}

@@ -1,4 +1,5 @@
-<h2>Welcome Patient!</h2>
+<h2>Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</h2>
 <p>You can view your appointments and medical records.</p>
 <a href="{% url 'patient_appointments' %}">View My Appointments</a><br />
+<a href="{% url 'view_medical_records' %}">📋 View Medical Records</a><br />
 <a href="{% url 'logout' %}">Logout</a>

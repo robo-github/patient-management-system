@@ -14,4 +14,8 @@ urlpatterns = [
     path('doctor/appointments/', views.view_appointments, name='view_appointments'),
     path('doctor/appointment/<int:appointment_id>/record/',
          views.add_medical_record, name='add_medical_record'),
+    path('patient/records/', views.view_medical_records,
+         name='view_medical_records'),
+    path('record/<int:record_id>/export/', views.export_pdf, name='export_pdf')
+
 ]

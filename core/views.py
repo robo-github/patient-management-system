@@ -1,10 +1,13 @@
+from django.http import HttpResponse
 from .models import Appointment, MedicalRecord, Doctor
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile, Patient
 from django.contrib.auth.models import User
-from django.utils import timezone
+from django.contrib import messages
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 
 def home(request):
@@ -56,6 +59,8 @@ def login_view(request):
             return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
 
+# All role wise dashboard
+
 
 @login_required
 def dashboard(request):
@@ -77,6 +82,8 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+# Book appointment (Receptionist side)
+
 
 @login_required
 def book_appointment(request):
@@ -84,23 +91,22 @@ def book_appointment(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        patient_id = request.POST.get('patient')
-        doctor_id = request.POST.get('doctor')
-        date = request.POST.get('date')
-        time = request.POST.get('time')
+        patient_id = request.POST['patient']
+        doctor_id = request.POST['doctor']
+        date = request.POST['date']
+        time = request.POST['time']
 
-        patient = Patient.objects.get(id=patient_id)
-        doctor = Doctor.objects.get(id=doctor_id)
-
+        # Save appointment
         Appointment.objects.create(
-            patient=patient,
-            doctor=doctor,
+            patient=Patient.objects.get(id=patient_id),
+            doctor=Doctor.objects.get(id=doctor_id),
             date=date,
             time=time,
             status='Scheduled'
         )
 
-        return redirect('dashboard')  # or a success page
+        messages.success(request, 'Appointment booked successfully.')
+        return redirect('book_appointment')
 
     patients = Patient.objects.all()
     doctors = Doctor.objects.all()
@@ -119,6 +125,8 @@ def doctor_dashboard(request):
     # doctor’s content
     return render(request, 'dashboard_doctor.html')
 
+# view appointment (Patient side)
+
 
 @login_required
 def patient_appointments(request):
@@ -127,11 +135,12 @@ def patient_appointments(request):
 
     # Only show appointments of this patient
     patient = request.user.patient
-    appointments = Appointment.objects.filter(patient=patient)
+    appointments = Appointment.objects.filter(
+        patient=patient).order_by('date', 'time')
 
     return render(request, 'patient_appointments.html', {'appointments': appointments})
 
-# view appointment
+# view appointment (Doctor side )
 
 
 @login_required
@@ -139,11 +148,15 @@ def view_appointments(request):
     if request.user.userprofile.role != 'doctor':
         return redirect('dashboard')
 
-    doctor = request.user.doctor
-    appointments = Appointment.objects.filter(doctor=doctor)
+    try:
+        doctor = request.user.doctor
+    except:
+        return HttpResponse("Doctor profile not found. Contact admin.")
+    appointments = Appointment.objects.filter(
+        doctor=doctor).order_by('date', 'time')
     return render(request, 'doctor_appointments.html', {'appointments': appointments})
 
-# Add medical report
+# Add medical report (Doctor side )
 
 
 @login_required
@@ -162,6 +175,36 @@ def add_medical_record(request, appointment_id):
             diagnosis=diagnosis,
             prescription=prescription
         )
-        return redirect('view_appointments')  # or doctor dashboard
+
+        messages.success(request, "Medical record added successfully.")
+        return redirect('view_appointments')
 
     return render(request, 'add_medical_record.html', {'appointment': appointment})
+
+# view medical records (Patient side)
+
+
+@login_required
+def view_medical_records(request):
+    if request.user.userprofile.role != 'patient':
+        return redirect('dashboard')
+
+    patient = request.user.patient
+    records = MedicalRecord.objects.filter(appointment__patient=patient)
+
+    return render(request, 'patient_medical_records.html', {'records': records})
+
+# pdf generate
+
+
+@login_required
+def export_pdf(request, record_id):
+    record = MedicalRecord.objects.get(id=record_id)
+    template_path = 'export_pdf.html'
+    context = {'record': record}
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="medical_record.pdf"'
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa.CreatePDF(html, dest=response)
+    return response
