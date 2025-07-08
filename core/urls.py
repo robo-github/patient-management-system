@@ -16,6 +16,13 @@ urlpatterns = [
          views.add_medical_record, name='add_medical_record'),
     path('patient/records/', views.view_medical_records,
          name='view_medical_records'),
-    path('record/<int:record_id>/export/', views.export_pdf, name='export_pdf')
+    path('record/<int:record_id>/export/', views.export_pdf, name='export_pdf'),
+    path('billing/add/', views.add_billing, name='add_billing'),
+    path('billing/view/', views.view_bills, name='view_bills'),
+    path('bill/<int:bill_id>/export/',
+         views.export_bill_pdf, name='export_bill_pdf'),
+    path('patient/bills/', views.patient_view_bills, name='patient_view_bills'),
+
+
 
 ]

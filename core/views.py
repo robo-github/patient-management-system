@@ -1,13 +1,13 @@
 from django.http import HttpResponse
-from .models import Appointment, MedicalRecord, Doctor
+from .models import Appointment, MedicalRecord, Doctor, UserProfile, Patient, Billing
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile, Patient
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from django.db.models import Sum
 
 
 def home(request):
@@ -170,16 +170,18 @@ def add_medical_record(request, appointment_id):
         diagnosis = request.POST.get('diagnosis')
         prescription = request.POST.get('prescription')
 
-        MedicalRecord.objects.create(
+        record = MedicalRecord.objects.create(
             appointment=appointment,
             diagnosis=diagnosis,
             prescription=prescription
         )
+        print("Record ID:", record.id)
 
         messages.success(request, "Medical record added successfully.")
         return redirect('view_appointments')
 
     return render(request, 'add_medical_record.html', {'appointment': appointment})
+
 
 # view medical records (Patient side)
 
@@ -208,3 +210,82 @@ def export_pdf(request, record_id):
     html = template.render(context)
     pisa.CreatePDF(html, dest=response)
     return response
+
+# Add Billing (receptionist side)
+
+
+@login_required
+def add_billing(request):
+    if request.user.userprofile.role != 'receptionist':
+        return redirect('dashboard')
+
+    patients = Patient.objects.all()
+
+    if request.method == 'POST':
+        patient_id = request.POST.get('patient')
+        service = request.POST.get('service')
+        amount = request.POST.get('amount')
+
+        patient = Patient.objects.get(id=patient_id)
+
+        Billing.objects.create(
+            patient=patient,
+            service=service,
+            amount=amount
+        )
+
+        messages.success(request, "Billing record added.")
+        return redirect('add_billing')
+
+    return render(request, 'add_billing.html', {'patients': patients})
+
+# View Billing (receptionist side)
+
+
+@login_required
+def view_bills(request):
+    if request.user.userprofile.role not in ['receptionist', 'admin']:
+        return redirect('dashboard')
+
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    bills = Billing.objects.all().order_by('-date')
+
+    if start_date and end_date:
+        bills = bills.filter(date__range=[start_date, end_date])
+
+    total_amount = bills.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    return render(request, 'view_bills.html', {
+        'bills': bills,
+        'total_amount': total_amount,
+        'start_date': start_date,
+        'end_date': end_date
+    })
+# Export bill pdf
+
+
+@login_required
+def export_bill_pdf(request, bill_id):
+    bill = Billing.objects.get(id=bill_id)
+    template_path = 'export_bill_pdf.html'
+    context = {'bill': bill}
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="bill.pdf"'
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa.CreatePDF(html, dest=response)
+    return response
+
+# patient bill view (patient side)
+
+
+@login_required
+def patient_view_bills(request):
+    if request.user.userprofile.role != 'patient':
+        return redirect('dashboard')
+
+    bills = Billing.objects.filter(
+        patient=request.user.patient).order_by('-date')
+    return render(request, 'patient_view_bills.html', {'bills': bills})

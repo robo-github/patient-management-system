@@ -1,0 +1,37 @@
+<h2>Your Billing History</h2>
+
+<table border="1" cellpadding="10">
+  <tr>
+    <th>Date</th>
+    <th>Service</th>
+    <th>Amount (₹)</th>
+    <th>Action</th>
+  </tr>
+
+  {% for bill in bills %}
+  <tr>
+    <td>{{ bill.date }}</td>
+    <td>{{ bill.service }}</td>
+    <td>₹{{ bill.amount }}</td>
+    <td>
+      <a href="{% url 'export_bill_pdf' bill.id %}">Download PDF</a>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="4">No billing records found.</td>
+  </tr>
+  {% endfor %}
+</table>
+<a
+  href="{% url 'dashboard' %}"
+  style="
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4caf50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  "
+  >← Back to Dashboard</a
+>

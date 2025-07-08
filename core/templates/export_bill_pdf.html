@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial;
+      }
+      h2 {
+        text-align: center;
+      }
+      .bill-box {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Hospital Billing Receipt</h2>
+    <div class="bill-box">
+      <p><strong>Patient:</strong> {{ bill.patient.user.get_full_name }}</p>
+      <p><strong>Date:</strong> {{ bill.date }}</p>
+      <p><strong>Service:</strong> {{ bill.service }}</p>
+      <p><strong>Amount:</strong> ₹{{ bill.amount }}</p>
+      <br />
+      <p>✅ Thank you for visiting!</p>
+    </div>
+  </body>
+</html>

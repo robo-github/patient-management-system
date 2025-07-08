@@ -1,0 +1,53 @@
+<h2>All Billing Records</h2>
+
+<!-- 🔍 Filter Form -->
+<form method="get">
+  <label>From:</label>
+  <input type="date" name="start_date" value="{{ start_date }}" />
+  <label>To:</label>
+  <input type="date" name="end_date" value="{{ end_date }}" />
+  <button type="submit">Filter</button>
+  <a href="{% url 'view_bills' %}">Reset</a>
+</form>
+
+<br />
+
+<table border="1" cellpadding="10">
+  <tr>
+    <th>Date</th>
+    <th>Patient</th>
+    <th>Service</th>
+    <th>Amount (₹)</th>
+    <th>Action</th>
+  </tr>
+
+  {% for bill in bills %}
+  <tr>
+    <td>{{ bill.date }}</td>
+    <td>{{ bill.patient.user.get_full_name }}</td>
+    <td>{{ bill.service }}</td>
+    <td>₹{{ bill.amount }}</td>
+    <td><a href="{% url 'export_bill_pdf' bill.id %}">Download PDF</a></td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="5">No billing records found.</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<!-- 💰 Total Amount Summary -->
+<h3>Total Amount: ₹{{ total_amount }}</h3>
+
+<a
+  href="{% url 'dashboard' %}"
+  style="
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4caf50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+  "
+  >← Back to Dashboard</a
+>

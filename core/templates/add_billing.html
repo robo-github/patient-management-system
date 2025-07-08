@@ -1,4 +1,8 @@
-<h2>Book Appointment</h2>
+<h2>Add Billing Record</h2>
+
+{% if messages %} {% for message in messages %}
+<p style="color: green">{{ message }}</p>
+{% endfor %} {% endif %}
 
 <form method="post">
   {% csrf_token %}
@@ -10,36 +14,25 @@
     {% endfor %}</select
   ><br /><br />
 
-  <label>Doctor:</label><br />
-  <select name="doctor" style="width: 300px; padding: 6px" required>
-    {% for doctor in doctors %}
-    <option value="{{ doctor.id }}">{{ doctor.user.get_full_name }}</option>
-    {% endfor %}</select
-  ><br /><br />
-
-  <label>Date:</label><br />
+  <label>Service:</label><br />
   <input
-    type="date"
-    name="date"
+    type="text"
+    name="service"
     style="width: 300px; padding: 6px"
     required
   /><br /><br />
 
-  <label>Time:</label><br />
+  <label>Amount (₹):</label><br />
   <input
-    type="time"
-    name="time"
+    type="number"
+    name="amount"
+    step="0.01"
     style="width: 300px; padding: 6px"
     required
   /><br /><br />
 
-  <button type="submit" style="width: 300px; padding: 6px">Book</button>
+  <button type="submit" style="width: 300px; padding: 6px">Add Bill</button>
 </form>
-
-{% if messages %} {% for message in messages %}
-<p style="color: green">{{ message }}</p>
-{% endfor %} {% endif %}
-
 <a
   href="{% url 'dashboard' %}"
   style="
