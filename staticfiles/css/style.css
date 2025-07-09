@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+nav {
+  background-color: transparent;
+  box-shadow: none;
+}
+body {
+  background-color: yellow ;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+header {
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+.logoName {
+  font-size: 20px;
+  font-weight: 800;
+  color: black;
+  text-decoration: none;
+}
+.hero-section {
+  background: #228bd6;
+  background: linear-gradient(98deg,rgba(34, 139, 214, 1) 20%, rgba(84, 179, 164, 1) 100%);
+}
+
+.hero-heading {
+  color: rgb(214, 0, 0) !important;
+  font-weight: 800;
+}
