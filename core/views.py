@@ -73,7 +73,21 @@ def dashboard(request):
     elif role == 'receptionist':
         return render(request, 'dashboard_receptionist.html')
     elif role == 'patient':
-        return render(request, 'dashboard_patient.html')
+        patient = request.user.patient
+
+        # Get counts
+        appointments_count = Appointment.objects.filter(
+            patient=patient, status='Scheduled').count()
+        records_count = MedicalRecord.objects.filter(
+            appointment__patient=patient).count()
+        bills_total = Billing.objects.filter(patient=patient).aggregate(Sum('amount'))[
+            'amount__sum'] or 0
+
+        return render(request, 'dashboard_patient.html', {
+            'appointments_count': appointments_count,
+            'records_count': records_count,
+            'bills_total': bills_total
+        })
     else:
         return redirect('logout')  # Unknown role
 
@@ -178,6 +192,8 @@ def add_medical_record(request, appointment_id):
             prescription=prescription
         )
         print("Record ID:", record.id)
+        appointment.status = 'Completed'
+        appointment.save()
 
         messages.success(request, "Medical record added successfully.")
         return redirect('view_appointments')
@@ -291,3 +307,16 @@ def patient_view_bills(request):
     bills = Billing.objects.filter(
         patient=request.user.patient).order_by('-date')
     return render(request, 'patient_view_bills.html', {'bills': bills})
+
+# patient payment history
+
+
+@login_required
+def patient_payment_history(request):
+    if request.user.userprofile.role != 'patient':
+        return redirect('dashboard')
+
+    bills = Billing.objects.filter(
+        patient=request.user.patient).order_by('-date')
+
+    return render(request, 'patient_payment_history.html', {'bills': bills})

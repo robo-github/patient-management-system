@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-4 pt-5">
+  <h3 class="mb-3">🧾 Payment History</h3>
+  {% if bills %}
+  <table class="table table-bordered shadow-sm bg-white">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Service</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bill in bills %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ bill.date|date:"Y-m-d" }}</td>
+        <td>{{ bill.service }}</td>
+        <td>₹{{ bill.amount }}</td>
+        <td>
+          <a
+            href="{% url 'export_bill_pdf' bill.id %}"
+            class="btn btn-sm btn-outline-danger"
+          >
+            Download PDF
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No payments made yet.</p>
+  {% endif %}
+  <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">
+    ← Back to Dashboard
+  </a>
+</div>
+{% endblock %}

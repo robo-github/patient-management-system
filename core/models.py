@@ -50,6 +50,13 @@ class Appointment(models.Model):
     time = models.TimeField()
     status = models.CharField(max_length=20, default='Scheduled')
 
+    STATUS_CHOICES = [
+        ('Scheduled', 'Scheduled'),
+        ('Completed', 'Completed'),
+    ]
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='Scheduled')
+
     def __str__(self):
         return f"{self.date} - {self.patient}"
 

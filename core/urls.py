@@ -22,6 +22,8 @@ urlpatterns = [
     path('bill/<int:bill_id>/export/',
          views.export_bill_pdf, name='export_bill_pdf'),
     path('patient/bills/', views.patient_view_bills, name='patient_view_bills'),
+    path('patient/payment-history/', views.patient_payment_history,
+         name='patient_payment_history'),
 
 
 

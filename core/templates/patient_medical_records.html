@@ -1,29 +1,49 @@
-<h2>Your Medical Records</h2>
+{% extends 'base.html' %} {% block content %}
 
-<ul>
-  {% for record in records %}
-  <li>
-    <strong>Date:</strong> {{ record.appointment.date }}<br />
-    <strong>Doctor:</strong> {{ record.appointment.doctor.user.first_name }}<br />
-    <strong>Diagnosis:</strong> {{ record.diagnosis }}<br />
-    <strong>Prescription:</strong> {{ record.prescription }}<br />
+<div class="container mt-5 pt-4">
+  <h3 class="mb-4 text-primary">🏥 Your Medical Records</h3>
 
-    <a href="{% url 'export_pdf' record.id %}">Download PDF</a>
-  </li>
-  <hr />
-  {% empty %}
-  <li>No records found.</li>
-  {% endfor %}
-</ul>
-<a
-  href="{% url 'dashboard' %}"
-  style="
-    display: inline-block;
-    padding: 8px 16px;
-    background-color: #4caf50;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-  "
-  >← Back to Dashboard</a
->
+  {% if records %}
+  <div class="table-responsive">
+    <table class="table table-bordered shadow-sm bg-white">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Doctor</th>
+          <th>Diagnosis</th>
+          <th>Prescription</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ record.appointment.date|date:"Y-m-d" }}</td>
+          <td>{{ record.appointment.doctor.user.get_full_name }}</td>
+          <td>{{ record.diagnosis }}</td>
+          <td>{{ record.prescription }}</td>
+          <td>
+            <a
+              href="{% url 'export_pdf' record.id %}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              Download PDF
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info">No medical records found.</div>
+  {% endif %}
+
+  <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">
+    ← Back to Dashboard
+  </a>
+</div>
+
+{% endblock %}

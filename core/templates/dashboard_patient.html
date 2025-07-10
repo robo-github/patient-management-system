@@ -1,6 +1,79 @@
-<h2>Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</h2>
-<p>You can view your appointments and medical records.</p>
-<a href="{% url 'patient_appointments' %}">View My Appointments</a><br />
-<a href="{% url 'view_medical_records' %}">📋 View Medical Records</a><br />
-<a href="{% url 'patient_view_bills' %}">View Your Bills</a><br />
-<a href="{% url 'logout' %}">Logout</a>
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5">
+  <h2 class="fw-bold">Patient Dashboard</h2>
+  <p class="text-muted">Manage your health records and appointments</p>
+
+  <!-- Top Info Cards -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center p-3">
+        <p>Upcoming Appointments</p>
+        <h4>{{ appointments_count }}</h4>
+        <span
+          class="material-symbols-outlined text-primary"
+          style="font-size: 36px"
+          >calendar_month</span
+        >
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center p-3">
+        <p>Medical Records</p>
+        <h4>{{ records_count }}</h4>
+        <span
+          class="material-symbols-outlined text-success"
+          style="font-size: 36px"
+          >description</span
+        >
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center p-3">
+        <p>Outstanding Bills</p>
+        <h4 class="text-success">₹{{ bills_total }}</h4>
+        <span
+          class="material-symbols-outlined text-success"
+          style="font-size: 36px"
+          >request_quote</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Records and Billing Sections -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3 mb-3">
+        <h5 class="fw-bold">Health Records</h5>
+        <a
+          href="{% url 'view_medical_records' %}"
+          class="btn btn-primary w-100 my-2"
+        >
+          <span class="material-symbols-outlined me-2">description</span> View
+          Medical Records
+        </a>
+        <a
+          href="{% url 'patient_appointments' %}"
+          class="btn btn-outline-dark w-100"
+        >
+          <span class="material-symbols-outlined me-2">calendar_month</span>
+          View Appointments
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3 mb-3">
+        <h5 class="fw-bold">Billing</h5>
+        <a
+          href="{% url 'patient_payment_history' %}"
+          class="btn btn-outline-dark w-100 mt-2"
+        >
+          <span class="material-symbols-outlined me-2">credit_card</span>
+          Payment History
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
