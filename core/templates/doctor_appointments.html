@@ -1,29 +1,56 @@
-<h2>Doctor's Appointments</h2>
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5 pt-4">
+  <h3 class="mb-4">📅 Appointments</h3>
 
-<ul>
-  {% for appointment in appointments %}
-  <li>
-    <strong>Date:</strong> {{ appointment.date }}<br />
-    <strong>Time:</strong> {{ appointment.time }}<br />
-    <strong>Patient:</strong> {{ appointment.patient.user.get_full_name }}<br />
-    <a href="{% url 'add_medical_record' appointment.id %}"
-      >Add Medical Record</a
-    >
-  </li>
-  <hr />
-  {% empty %}
-  <li>No appointments found.</li>
-  {% endfor %}
-</ul>
-<a
-  href="{% url 'dashboard' %}"
-  style="
-    display: inline-block;
-    padding: 8px 16px;
-    background-color: #4caf50;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-  "
-  >← Back to Dashboard</a
->
+  {% if appointments %}
+  <div class="table-responsive">
+    <table class="table table-bordered shadow-sm bg-white">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Patient</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appt in appointments %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ appt.date|date:"Y-m-d" }}</td>
+          <td>{{ appt.time }}</td>
+          <td>{{ appt.patient.user.get_full_name }}</td>
+          <td>
+            {% if appt.medicalrecord %}
+            <span class="badge bg-success">Completed</span>
+            {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if not appt.medicalrecord %}
+            <a
+              href="{% url 'add_medical_record' appt.id %}"
+              class="btn btn-sm btn-outline-primary"
+              >Add Report</a
+            >
+            {% else %}
+            <span class="text-muted">Report Added</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>No appointments scheduled.</p>
+  {% endif %}
+
+  <a href="{% url 'dashboard' %}" class="btn btn-success mt-3"
+    >← Back to Dashboard</a
+  >
+</div>
+{% endblock %}
